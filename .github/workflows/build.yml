@@ -1,0 +1,45 @@
+name: Build HTML to APK
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install Buildozer and Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libssl-dev cmake
+        pip install --user --upgrade buildozer Cython==0.29.33 virtualenv
+
+    - name: Create Config and Build APK
+      run: |
+        # Initialize a simple config for website to APK
+        echo '[app]' > buildozer.spec
+        echo 'title = My First App' >> buildozer.spec
+        echo 'package.name = myfirstapp' >> buildozer.spec
+        echo 'package.domain = org.test' >> buildozer.spec
+        echo 'source.dir = .' >> buildozer.spec
+        echo 'source.include_exts = html,css,js' >> buildozer.spec
+        echo 'version = 0.1' >> buildozer.spec
+        echo 'requirements = python3,kivy' >> buildozer.spec
+        echo 'orientation = portrait' >> buildozer.spec
+        echo 'osx.kivy_version = 2.1.0' >> buildozer.spec
+        echo 'fullscreen = 1' >> buildozer.spec
+        echo 'android.archs = arm64-v8a' >> buildozer.spec
+
+        # Run buildozer
+        ~/.local/bin/buildozer android debug
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: Android-APK
+        path: .blur/bin/*.apk || bin/*.apk
