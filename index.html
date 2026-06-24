@@ -1,85 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>My App</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My App</title>
+    <style>
+        /* Poori screen ko set karne ke liye takki scrollbar na aaye */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #ffffff;
+            font-family: sans-serif;
+        }
 
-<style>
-html,body{
-margin:0;
-width:100%;
-height:100%;
-font-family:Arial,sans-serif;
-}
+        /* Error Screen ki styling */
+        #error-screen {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
 
-#offline{
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-justify-content:center;
-align-items:center;
-flex-direction:column;
-background:white;
-text-align:center;
-}
+        #error-screen h2 {
+            color: #d9534f;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
 
-#frame{
-width:100%;
-height:100%;
-border:none;
-display:none;
-}
+        #error-screen p {
+            color: #666666;
+            font-size: 16px;
+        }
 
-button{
-padding:12px 20px;
-border:none;
-border-radius:20px;
-background:#1976d2;
-color:white;
-}
-</style>
+        /* Iframe ki styling */
+        #my-iframe {
+            display: none;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
 </head>
 <body>
 
-<div id="offline">
-<h2>📶 No Internet Connection</h2>
-<p>Please check your network connection.</p>
-<button onclick="startApp()">Retry</button>
-</div>
+    <!-- Error Message Screen (Sirf tab dikhegi jab net band hoga) -->
+    <div id="error-screen">
+        <h2>Internet Connection Nahi Hai</h2>
+        <p>Kripya apna net chalu karein aur app ko dobara kholein.</p>
+    </div>
 
-<iframe id="frame"></iframe>
+    <!-- Aapka Iframe (Sirf tab dikhega aur load hoga jab net chalu hoga) -->
+    <iframe id="my-iframe" src=""></iframe>
 
-<script>
-const URL = "https://ydvaditya20-creator.github.io/LL-salary/";
+    <script>
+        window.addEventListener('load', function() {
+            var iframe = document.getElementById('my-iframe');
+            var errorScreen = document.getElementById('error-screen');
 
-function startApp(){
+            // NOTE: "APNA_GITHUB_PAGES_URL_YAHAN_LIKHEIN" ko apne asli URL se badlein
+            var targetUrl = "https://ydvaditya20-creator.github.io/LL-salary/";
 
- if(navigator.onLine){
-
-   document.getElementById("offline").style.display="none";
-
-   const frame=document.getElementById("frame");
-   frame.style.display="block";
-   frame.src=URL;
-
- }else{
-
-   document.getElementById("frame").style.display="none";
-   document.getElementById("offline").style.display="flex";
-
- }
-
-}
-
-window.addEventListener("online",startApp);
-window.addEventListener("offline",startApp);
-
-startApp();
-</script>
+            if (navigator.onLine) {
+                // Agar internet chalu hai
+                iframe.src = targetUrl;
+                iframe.style.display = "block";
+                errorScreen.style.display = "none";
+            } else {
+                // Agar internet band hai
+                errorScreen.style.display = "flex";
+                iframe.style.display = "none";
+            }
+        });
+    </script>
 
 </body>
 </html>
