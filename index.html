@@ -1,76 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My App</title>
-    <style>
-        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: sans-serif; background-color: #ffffff; }
-        iframe { border: none; width: 100%; height: 100%; display: none; position: absolute; top: 0; left: 0; z-index: 10; }
-        
-        /* Offline Screen Styling */
-        #offline-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 20px; box-sizing: border-box; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; background: #ffffff; }
-        .icon { font-size: 64px; margin-bottom: 20px; }
-        .title { font-size: 22px; font-weight: bold; color: #333; margin-bottom: 10px; }
-        .message { font-size: 16px; color: #666; margin-bottom: 25px; }
-        .btn { background-color: #007bff; color: white; border: none; padding: 12px 30px; font-size: 16px; border-radius: 25px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My App</title>
+
+<style>
+html,body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    font-family:Arial,sans-serif;
+    background:#fff;
+}
+
+#web-frame{
+    width:100%;
+    height:100%;
+    border:none;
+    display:none;
+}
+
+#offline-screen{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:20px;
+    box-sizing:border-box;
+    background:#fff;
+}
+
+.icon{
+    font-size:70px;
+    margin-bottom:15px;
+}
+
+.title{
+    font-size:24px;
+    font-weight:bold;
+    color:#222;
+    margin-bottom:10px;
+}
+
+.message{
+    color:#666;
+    font-size:16px;
+    margin-bottom:25px;
+}
+
+.btn{
+    background:#007bff;
+    color:white;
+    border:none;
+    padding:12px 25px;
+    border-radius:30px;
+    font-size:16px;
+    cursor:pointer;
+}
+</style>
 </head>
 <body>
 
-    <!-- Offline Screen -->
-    <div id="offline-screen">
-        <div class="icon">⚠️</div>
-        <div class="title">No Internet Connection</div>
-        <div class="message">Please check your mobile data or Wi-Fi and try again.</div>
-        <button class="btn" onclick="checkInternetByPing()">Retry</button>
+<div id="offline-screen">
+    <div class="icon">📶</div>
+    <div class="title">No Internet Connection</div>
+    <div class="message">
+        Please connect to Wi-Fi or Mobile Data.
     </div>
+    <button class="btn" onclick="checkInternet()">
+        Retry
+    </button>
+</div>
 
-    <!-- Webpage iFrame -->
-    <!-- Niche 'https://example.com' ki jagah apni website ka URL dalein -->
-    <iframe id="web-frame" src="https://ydvaditya20-creator.github.io/LL-salary/"></iframe>
+<iframe
+    id="web-frame"
+    src="about:blank">
+</iframe>
 
-    <script>
-        const offlineScreen = document.getElementById('offline-screen');
-        const webFrame = document.getElementById('web-frame');
-        const targetUrl = "https://example.com"; // Yahan bhi apna real URL dalein
+<script>
+const WEBSITE_URL = "https://ydvaditya20-creator.github.io/LL-salary/";
 
-        function checkInternetByPing() {
-            // Google ya kisi live small image ko load karke network check karna
-            // Iske liye internet plugin ki zaroorat nahi hai
-            const img = new Image();
-            
-            img.onload = function() {
-                // Agar image load ho gayi matlb internet chal raha hai
-                offlineScreen.style.display = 'none';
-                webFrame.style.display = 'block';
-                
-                // Agar iframe abhi tak load nahi hua tha toh use load karein
-                if (webFrame.src !== targetUrl) {
-                    webFrame.src = targetUrl;
-                }
-            };
-            
-            img.onerror = function() {
-                // Agar image load nahi hui matlb net nahi chal raha hai
-                offlineScreen.style.display = 'flex';
-                webFrame.style.display = 'none';
-                webFrame.src = "about:blank"; // Iframe ko crash hone se bachane ke liye
-            };
+const offlineScreen = document.getElementById("offline-screen");
+const webFrame = document.getElementById("web-frame");
 
-            // Ek random number add kar rahe hain taaki image cache na ho
-            img.src = "https://google.com" + new Date().getTime();
-        }
+function showOnline() {
+    offlineScreen.style.display = "none";
+    webFrame.style.display = "block";
 
-        // App open hote hi check karein
-        checkInternetByPing();
+    if (webFrame.src === "about:blank") {
+        webFrame.src = WEBSITE_URL;
+    }
+}
 
-        // Har 5 second mein auto check karein agar app offline screen par ruki hui hai
-        setInterval(() => {
-            if (offlineScreen.style.display === 'flex') {
-                checkInternetByPing();
-            }
-        }, 5000);
-    </script>
+function showOffline() {
+    offlineScreen.style.display = "flex";
+    webFrame.style.display = "none";
+}
+
+function checkInternet() {
+
+    if (navigator.onLine === false) {
+        showOffline();
+        return;
+    }
+
+    const img = new Image();
+
+    img.onload = function () {
+        showOnline();
+    };
+
+    img.onerror = function () {
+        showOffline();
+    };
+
+    img.src =
+        "https://www.gstatic.com/generate_204?t=" +
+        Date.now();
+}
+
+window.addEventListener("online", checkInternet);
+window.addEventListener("offline", showOffline);
+
+checkInternet();
+
+setInterval(checkInternet, 10000);
+</script>
+
 </body>
 </html>
