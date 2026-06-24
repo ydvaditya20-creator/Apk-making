@@ -5,12 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>My App</title>
     <style>
-        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
-        iframe { border: none; width: 100%; height: 100%; }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: sans-serif; background-color: #f4f6f9; }
+        iframe { border: none; width: 100%; height: 100%; display: none; }
+        
+        /* Offline Screen Styling */
+        #offline-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 20px; box-sizing: border-box; }
+        .icon { font-size: 64px; margin-bottom: 20px; }
+        .title { font-size: 22px; font-weight: bold; color: #333; margin-bottom: 10px; }
+        .message { font-size: 16px; color: #666; margin-bottom: 25px; }
+        .btn { background-color: #007bff; color: white; border: none; padding: 12px 30px; font-size: 16px; border-radius: 25px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
-    <!-- Apni website ka URL src mein dalein -->
-    <iframe src="https://ydvaditya20-creator.github.io/LL-salary/"></iframe>
+
+    <!-- Offline Screen (By default yehi dikhega jab tak net check na ho) -->
+    <div id="offline-screen">
+        <div class="icon">⚠️</div>
+        <div class="title">No Internet Connection</div>
+        <div class="message">Please check your mobile data or Wi-Fi and try again.</div>
+        <button class="btn" onclick="checkConnection()">Retry</button>
+    </div>
+
+    <!-- Webpage iFrame -->
+    <!-- Niche 'https://example.com' ki jagah apna real URL dalein -->
+    <iframe id="web-frame" src="https://ydvaditya20-creator.github.io/LL-salary/"></iframe>
+
+    <script>
+        const offlineScreen = document.getElementById('offline-screen');
+        const webFrame = document.getElementById('web-frame');
+
+        function checkConnection() {
+            if (navigator.onLine) {
+                // Agar internet hai toh iframe dikhao aur reload karo
+                offlineScreen.style.display = 'none';
+                webFrame.style.style.display = 'block';
+                
+                // Agar iframe pehle se fail ho chuka tha, toh use dobara refresh karein
+                if(webFrame.src === "" || webFrame.src === "about:blank") {
+                    webFrame.src = "https://example.com"; 
+                }
+            } else {
+                // Agar internet nahi hai toh offline screen dikhao
+                offlineScreen.style.display = 'flex';
+                webFrame.style.display = 'none';
+            }
+        }
+
+        // 1. App khulte hi check karein
+        checkConnection();
+
+        // 2. Agar chalti app mein internet chala jaye
+        window.addEventListener('offline', () => {
+            offlineScreen.style.display = 'flex';
+            webFrame.style.display = 'none';
+        });
+
+        // 3. Agar chalti app mein internet wapas aa jaye
+        window.addEventListener('online', () => {
+            checkConnection();
+        });
+    </script>
 </body>
 </html>
