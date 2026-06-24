@@ -7,12 +7,12 @@ jobs:
 build:
 runs-on: ubuntu-latest
 
-
+```
 steps:
-  - name: Checkout Repository
+  - name: Checkout
     uses: actions/checkout@v4
 
-  - name: Setup Node.js
+  - name: Setup Node
     uses: actions/setup-node@v4
     with:
       node-version: 20
@@ -20,27 +20,27 @@ steps:
   - name: Install Dependencies
     run: npm install
 
-  - name: Create Capacitor Config
-    run: |
-      cat > capacitor.config.json << EOF
-      {
-        "appId": "com.example.myapp",
-        "appName": "MyApp",
-        "webDir": "."
-      }
-      EOF
-
   - name: Install Capacitor
     run: |
       npm install @capacitor/core @capacitor/android @capacitor/cli
 
-  - name: Verify Capacitor
-    run: npx cap --version
+  - name: Create Web Folder
+    run: |
+      mkdir -p www
+      cp index.html www/
 
-  - name: Add Android Platform
+  - name: Create Capacitor Config
+    run: |
+      echo '{
+        "appId":"com.example.myapp",
+        "appName":"MyApp",
+        "webDir":"www"
+      }' > capacitor.config.json
+
+  - name: Add Android
     run: npx cap add android
 
-  - name: Sync Capacitor
+  - name: Sync Android
     run: npx cap sync android
 
   - name: Build APK
@@ -52,5 +52,6 @@ steps:
   - name: Upload APK
     uses: actions/upload-artifact@v4
     with:
-      name: app-debug-apk
+      name: app-debug
       path: android/app/build/outputs/apk/debug/app-debug.apk
+```
