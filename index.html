@@ -1,139 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>My App</title>
 
 <style>
 html,body{
-    margin:0;
-    padding:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    font-family:Arial,sans-serif;
-    background:#fff;
+margin:0;
+width:100%;
+height:100%;
+font-family:Arial,sans-serif;
 }
 
-#web-frame{
-    width:100%;
-    height:100%;
-    border:none;
-    display:none;
+#offline{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+background:white;
+text-align:center;
 }
 
-#offline-screen{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-    padding:20px;
-    box-sizing:border-box;
-    background:#fff;
+#frame{
+width:100%;
+height:100%;
+border:none;
+display:none;
 }
 
-.icon{
-    font-size:70px;
-    margin-bottom:15px;
-}
-
-.title{
-    font-size:24px;
-    font-weight:bold;
-    color:#222;
-    margin-bottom:10px;
-}
-
-.message{
-    color:#666;
-    font-size:16px;
-    margin-bottom:25px;
-}
-
-.btn{
-    background:#007bff;
-    color:white;
-    border:none;
-    padding:12px 25px;
-    border-radius:30px;
-    font-size:16px;
-    cursor:pointer;
+button{
+padding:12px 20px;
+border:none;
+border-radius:20px;
+background:#1976d2;
+color:white;
 }
 </style>
 </head>
 <body>
 
-<div id="offline-screen">
-    <div class="icon">📶</div>
-    <div class="title">No Internet Connection</div>
-    <div class="message">
-        Please connect to Wi-Fi or Mobile Data.
-    </div>
-    <button class="btn" onclick="checkInternet()">
-        Retry
-    </button>
+<div id="offline">
+<h2>📶 No Internet Connection</h2>
+<p>Please check your network connection.</p>
+<button onclick="startApp()">Retry</button>
 </div>
 
-<iframe
-    id="web-frame"
-    src="about:blank">
-</iframe>
+<iframe id="frame"></iframe>
 
 <script>
-const WEBSITE_URL = "https://ydvaditya20-creator.github.io/LL-salary/";
+const URL = "https://ydvaditya20-creator.github.io/LL-salary/";
 
-const offlineScreen = document.getElementById("offline-screen");
-const webFrame = document.getElementById("web-frame");
+function startApp(){
 
-function showOnline() {
-    offlineScreen.style.display = "none";
-    webFrame.style.display = "block";
+ if(navigator.onLine){
 
-    if (webFrame.src === "about:blank") {
-        webFrame.src = WEBSITE_URL;
-    }
+   document.getElementById("offline").style.display="none";
+
+   const frame=document.getElementById("frame");
+   frame.style.display="block";
+   frame.src=URL;
+
+ }else{
+
+   document.getElementById("frame").style.display="none";
+   document.getElementById("offline").style.display="flex";
+
+ }
+
 }
 
-function showOffline() {
-    offlineScreen.style.display = "flex";
-    webFrame.style.display = "none";
-}
+window.addEventListener("online",startApp);
+window.addEventListener("offline",startApp);
 
-function checkInternet() {
-
-    if (navigator.onLine === false) {
-        showOffline();
-        return;
-    }
-
-    const img = new Image();
-
-    img.onload = function () {
-        showOnline();
-    };
-
-    img.onerror = function () {
-        showOffline();
-    };
-
-    img.src =
-        "https://www.gstatic.com/generate_204?t=" +
-        Date.now();
-}
-
-window.addEventListener("online", checkInternet);
-window.addEventListener("offline", showOffline);
-
-checkInternet();
-
-setInterval(checkInternet, 10000);
+startApp();
 </script>
 
 </body>
