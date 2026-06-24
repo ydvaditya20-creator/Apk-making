@@ -5,64 +5,82 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>My App</title>
     <style>
-        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: sans-serif; background-color: #f4f6f9; }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: sans-serif; background-color: #ffffff; }
         iframe { border: none; width: 100%; height: 100%; display: none; }
         
-        /* Offline Screen Styling */
         #offline-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 20px; box-sizing: border-box; }
         .icon { font-size: 64px; margin-bottom: 20px; }
         .title { font-size: 22px; font-weight: bold; color: #333; margin-bottom: 10px; }
         .message { font-size: 16px; color: #666; margin-bottom: 25px; }
-        .btn { background-color: #007bff; color: white; border: none; padding: 12px 30px; font-size: 16px; border-radius: 25px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn { background-color: #007bff; color: white; border: none; padding: 12px 30px; font-size: 16px; border-radius: 25px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <!-- Offline Screen (By default yehi dikhega jab tak net check na ho) -->
+    <!-- Offline Screen -->
     <div id="offline-screen">
-        <div class="icon">⚠️</div>
-        <div class="title">No Internet Connection</div>
-        <div class="message">Please check your mobile data or Wi-Fi and try again.</div>
-        <button class="btn" onclick="checkConnection()">Retry</button>
+        <div class="icon">🌐</div>
+        <div class="title">No Internet</div>
+        <div class="message">Please check your network connection.</div>
+        <button class="btn" onclick="checkNetworkNative()">Retry</button>
     </div>
 
-    <!-- Webpage iFrame -->
-    <!-- Niche 'https://example.com' ki jagah apna real URL dalein -->
+    <!-- Webpage iFrame (https://example.com ko apne URL se badlein) -->
     <iframe id="web-frame" src="https://ydvaditya20-creator.github.io/LL-salary/"></iframe>
 
+    <!-- Capacitor core files require hote hain native plugins ke liye -->
+    <script src="capacitor.js"></script>
+    
     <script>
         const offlineScreen = document.getElementById('offline-screen');
         const webFrame = document.getElementById('web-frame');
+        const targetUrl = "https://example.com"; // Apna URL yahan bhi badlein
 
-        function checkConnection() {
-            if (navigator.onLine) {
-                // Agar internet hai toh iframe dikhao aur reload karo
-                offlineScreen.style.display = 'none';
-                webFrame.style.style.display = 'block';
-                
-                // Agar iframe pehle se fail ho chuka tha, toh use dobara refresh karein
-                if(webFrame.src === "" || webFrame.src === "about:blank") {
-                    webFrame.src = "https://example.com"; 
+        // Native Capacitor Network function
+        async function checkNetworkNative() {
+            try {
+                if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Network) {
+                    const status = await window.Capacitor.Plugins.Network.getStatus();
+                    
+                    if (status.connected) {
+                        showWebsite();
+                    } else {
+                        showOffline();
+                    }
+                } else {
+                    // Fallback agar plugin load nahi hua (Jaise browser testing mein)
+                    if (navigator.onLine) { showWebsite(); } else { showOffline(); }
                 }
-            } else {
-                // Agar internet nahi hai toh offline screen dikhao
-                offlineScreen.style.display = 'flex';
-                webFrame.style.display = 'none';
+            } catch (e) {
+                // Kisi bhi error ke case mein fallback
+                showWebsite();
             }
         }
 
-        // 1. App khulte hi check karein
-        checkConnection();
+        function showWebsite() {
+            offlineScreen.style.display = 'none';
+            webFrame.style.display = 'block';
+            if (webFrame.src !== targetUrl) {
+                webFrame.src = targetUrl;
+            }
+        }
 
-        // 2. Agar chalti app mein internet chala jaye
-        window.addEventListener('offline', () => {
+        function showOffline() {
             offlineScreen.style.display = 'flex';
             webFrame.style.display = 'none';
-        });
+        }
 
-        // 3. Agar chalti app mein internet wapas aa jaye
-        window.addEventListener('online', () => {
-            checkConnection();
+        // App start hote hi check karein
+        window.addEventListener('DOMContentLoaded', () => {
+            // Thoda delay taaki Capacitor plugins initialize ho sakein
+            setTimeout(checkNetworkNative, 500);
+
+            // Native Network listener lagayein jo net aate-jaate hi trigger ho
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Network) {
+                window.Capacitor.Plugins.Network.addListener('networkStatusChange', status => {
+                    if (status.connected) { showWebsite(); } else { showOffline(); }
+                });
+            }
         });
     </script>
 </body>
