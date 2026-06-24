@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,82 +6,71 @@
     <title>My App</title>
     <style>
         html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: sans-serif; background-color: #ffffff; }
-        iframe { border: none; width: 100%; height: 100%; display: none; }
+        iframe { border: none; width: 100%; height: 100%; display: none; position: absolute; top: 0; left: 0; z-index: 10; }
         
-        #offline-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 20px; box-sizing: border-box; }
+        /* Offline Screen Styling */
+        #offline-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 20px; box-sizing: border-box; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; background: #ffffff; }
         .icon { font-size: 64px; margin-bottom: 20px; }
         .title { font-size: 22px; font-weight: bold; color: #333; margin-bottom: 10px; }
         .message { font-size: 16px; color: #666; margin-bottom: 25px; }
-        .btn { background-color: #007bff; color: white; border: none; padding: 12px 30px; font-size: 16px; border-radius: 25px; cursor: pointer; font-weight: bold; }
+        .btn { background-color: #007bff; color: white; border: none; padding: 12px 30px; font-size: 16px; border-radius: 25px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
     <!-- Offline Screen -->
     <div id="offline-screen">
-        <div class="icon">🌐</div>
-        <div class="title">No Internet</div>
-        <div class="message">Please check your network connection.</div>
-        <button class="btn" onclick="checkNetworkNative()">Retry</button>
+        <div class="icon">⚠️</div>
+        <div class="title">No Internet Connection</div>
+        <div class="message">Please check your mobile data or Wi-Fi and try again.</div>
+        <button class="btn" onclick="checkInternetByPing()">Retry</button>
     </div>
 
-    <!-- Webpage iFrame (https://example.com ko apne URL se badlein) -->
+    <!-- Webpage iFrame -->
+    <!-- Niche 'https://example.com' ki jagah apni website ka URL dalein -->
     <iframe id="web-frame" src="https://ydvaditya20-creator.github.io/LL-salary/"></iframe>
 
-    <!-- Capacitor core files require hote hain native plugins ke liye -->
-    <script src="capacitor.js"></script>
-    
     <script>
         const offlineScreen = document.getElementById('offline-screen');
         const webFrame = document.getElementById('web-frame');
-        const targetUrl = "https://example.com"; // Apna URL yahan bhi badlein
+        const targetUrl = "https://example.com"; // Yahan bhi apna real URL dalein
 
-        // Native Capacitor Network function
-        async function checkNetworkNative() {
-            try {
-                if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Network) {
-                    const status = await window.Capacitor.Plugins.Network.getStatus();
-                    
-                    if (status.connected) {
-                        showWebsite();
-                    } else {
-                        showOffline();
-                    }
-                } else {
-                    // Fallback agar plugin load nahi hua (Jaise browser testing mein)
-                    if (navigator.onLine) { showWebsite(); } else { showOffline(); }
+        function checkInternetByPing() {
+            // Google ya kisi live small image ko load karke network check karna
+            // Iske liye internet plugin ki zaroorat nahi hai
+            const img = new Image();
+            
+            img.onload = function() {
+                // Agar image load ho gayi matlb internet chal raha hai
+                offlineScreen.style.display = 'none';
+                webFrame.style.display = 'block';
+                
+                // Agar iframe abhi tak load nahi hua tha toh use load karein
+                if (webFrame.src !== targetUrl) {
+                    webFrame.src = targetUrl;
                 }
-            } catch (e) {
-                // Kisi bhi error ke case mein fallback
-                showWebsite();
-            }
+            };
+            
+            img.onerror = function() {
+                // Agar image load nahi hui matlb net nahi chal raha hai
+                offlineScreen.style.display = 'flex';
+                webFrame.style.display = 'none';
+                webFrame.src = "about:blank"; // Iframe ko crash hone se bachane ke liye
+            };
+
+            // Ek random number add kar rahe hain taaki image cache na ho
+            img.src = "https://google.com" + new Date().getTime();
         }
 
-        function showWebsite() {
-            offlineScreen.style.display = 'none';
-            webFrame.style.display = 'block';
-            if (webFrame.src !== targetUrl) {
-                webFrame.src = targetUrl;
+        // App open hote hi check karein
+        checkInternetByPing();
+
+        // Har 5 second mein auto check karein agar app offline screen par ruki hui hai
+        setInterval(() => {
+            if (offlineScreen.style.display === 'flex') {
+                checkInternetByPing();
             }
-        }
-
-        function showOffline() {
-            offlineScreen.style.display = 'flex';
-            webFrame.style.display = 'none';
-        }
-
-        // App start hote hi check karein
-        window.addEventListener('DOMContentLoaded', () => {
-            // Thoda delay taaki Capacitor plugins initialize ho sakein
-            setTimeout(checkNetworkNative, 500);
-
-            // Native Network listener lagayein jo net aate-jaate hi trigger ho
-            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Network) {
-                window.Capacitor.Plugins.Network.addListener('networkStatusChange', status => {
-                    if (status.connected) { showWebsite(); } else { showOffline(); }
-                });
-            }
-        });
+        }, 5000);
     </script>
 </body>
 </html>
