@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Capacitor App</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; font-family: Arial, sans-serif; overflow: hidden; background-color: #ffffff; }
+        iframe { width: 100%; height: 100%; border: none; }
+        #error-screen { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background-color: #ffffff; position: absolute; top: 0; left: 0; z-index: 10; text-align: center; }
+        .error-box h2 { color: #e74c3c; margin-bottom: 10px; }
+        .error-box p { color: #555; margin-bottom: 20px; }
+        .error-box button { background-color: #3498db; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- एरर स्क्रीन -->
+    <div id="error-screen" class="hidden">
+        <div class="error-box">
+            <h2>⚠️ कोई इंटरनेट नहीं है</h2>
+            <p>कृपया अपना मोबाइल डेटा या वाई-फ़ाई ऑन करें।</p>
+            <button onclick="checkInternetAndLoad()">फिर से कोशिश करें 🔄</button>
+        </div>
+    </div>
+
+    <!-- आईफ्रेम (यहाँ https://example.com की जगह अपना वेबसाइट URL डालें) -->
+    <iframe id="web-view" src="https://ydvaditya20-creator.github.io/LL-salary/" class="hidden"></iframe>
+
+    <script>
+        function checkInternetAndLoad() {
+            const errorScreen = document.getElementById('error-screen');
+            const webView = document.getElementById('web-view');
+
+            if (navigator.onLine) {
+                errorScreen.classList.add('hidden');
+                webView.classList.remove('hidden');
+                webView.src = webView.src; // रीलोड करने के लिए
+            } else {
+                webView.classList.add('hidden');
+                errorScreen.classList.remove('hidden');
+            }
+        }
+        window.addEventListener('DOMContentLoaded', checkInternetAndLoad);
+        window.addEventListener('online', checkInternetAndLoad);
+        window.addEventListener('offline', checkInternetAndLoad);
+    </script>
+</body>
+</html>
